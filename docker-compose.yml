@@ -1,0 +1,86 @@
+version: '3'
+volumes:
+  logs:
+    driver: local
+    driver_opts:
+      type: none
+      device: "${SWA_HOST_LOG_DIR}"
+      o: bind
+  dummy:
+    driver: local
+
+services:
+  core-service:
+    image: "signavio-on-premise.jfrog.io/swa/core-service:v3.136.0-rc0"
+    env_file: .env
+    environment:
+      SWA_PRECONDITION_SERVICES: "tcp:script-engine:8081"
+      CATALINA_OPTS: "-Deffektif.javascript.server.url=http://script-engine:8081 \
+        -Deffektif.license.location=/config \
+        -Dlogback.configurationFile=/workflow/logback.xml \
+        -Deffektif.google.secrets.location=/config/google_drive_client_secrets.json"
+    volumes:
+      - logs:/usr/share/tomcat/logs
+      - ${SWA_CORE_SERVICE_HOST_CONFIG_DIR}:/config
+      - ${SWA_CONFIG_PROVIDER_DIR:-dummy}:/swa_lib
+    depends_on:
+      - script-engine
+    restart: on-failure
+
+  script-engine:
+    image: "signavio-on-premise.jfrog.io/swa/script-engine:v3.136.0-rc0"
+    env_file: .env
+    environment:
+      WORKFLOW_URL: "http://core-service:80"
+      SE_HOST: "0.0.0.0"
+      SE_PORT: 8081
+      TZ:
+      SE_LOG_LEVEL: "${SWA_SCRIPT_ENGINE_LOG_LEVEL:-info}"
+      SE_LOG_TO_FILE: "true"
+      SE_LOG_FILE: "/workflow/logs/script-engine.log"
+      SE_LOG_ERROR_FILE: "/workflow/logs/script-engine.error.log"
+      SE_LOG_FILE_MAX_SIZE: 10000000
+      SE_EXECUTION_TIMEOUT: 60
+      SE_LOG_SIZE: 20000
+      ELK_LOG_ENABLED: "false"
+    volumes:
+      - logs:/workflow/logs
+    restart: on-failure
+
+  mail-relay:
+    image: "${SWA_MAIL_RELAY_IMG:-signavio-on-premise.jfrog.io/swa/mail-relay:v3.0.0}"
+    env_file: .env
+    environment:
+      SWA_MAIL_RELAY_SERVER_URL: "http://core-service:80"
+      SWA_MAIL_RELAY_LOGBACK_MAX_HISTORY: 30
+    ports:
+      - "0.0.0.0:${SWA_MAIL_RELAY_PORT:-25}:25"
+    volumes:
+      - logs:/workflow/logs
+    restart: on-failure
+
+  public-api:
+    image: "${SWA_PUBLIC_API_IMG:-signavio-on-premise.jfrog.io/swa/public-api:v0.0.2}"
+    environment:
+      SPRING_DATA_MONGODB_URI: "${SWA_CORE_SERVICE_MONGODB_URI}"
+      WORKFLOW_API_REST_SWA_URL: "${SWA_CORE_SERVICE_BASEURL}"
+      CRNK_DOMAIN_NAME: "${SWA_CORE_SERVICE_BASEURL}"
+      LOG_FILE: "/workflow/logs/public-api.log"
+    volumes:
+      - logs:/workflow/logs
+    restart: on-failure
+
+  https-proxy:
+    image: "signavio-on-premise.jfrog.io/swa/https-proxy:v1.0.0"
+    env_file: .env
+    environment:
+      CORE_SERVICE_URL: "http://core-service:80"
+      SWA_BASE_URL: "${SWA_CORE_SERVICE_BASEURL}"
+    ports:
+      - "${SWA_CORE_SERVICE_PORT:-443}:443"
+      - "80:80"
+    volumes:
+      - ${SWA_HTTPS_PROXY_CERT_DIR:-dummy}:/etc/ssl/certs/signavio
+    depends_on:
+      - core-service
+    restart: on-failure
