@@ -1,0 +1,14 @@
+name: Add PR to SWA dev board
+on: 
+  pull_request:
+    types: [opened, ready_for_review]
+jobs:
+  add-project-card-to-board:
+    runs-on: ubuntu-latest
+    steps:
+    - name: 'Add card to project board'
+      uses: signavio/create-project-card-action@v2
+      with:
+         column_id: 3019999
+         github_token: ${{ secrets.GLOBAL_GITHUB_TOKEN }}
+         ignore_drafts: true
