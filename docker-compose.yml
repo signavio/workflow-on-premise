@@ -16,8 +16,8 @@ services:
         -Dlogback.configurationFile=/workflow/logback.xml \
         -Deffektif.google.secrets.location=/config/google_drive_client_secrets.json"
     volumes:
-      - ${SWA_HOST_LOG_DIR}:/usr/share/tomcat/logs
-      - ${SWA_CORE_SERVICE_HOST_CONFIG_DIR}:/config
+      - ${SWA_HOST_LOG_DIR:-./logs}:/usr/share/tomcat/logs
+      - ${SWA_CORE_SERVICE_HOST_CONFIG_DIR:-./config}:/config
       - ${SWA_CONFIG_PROVIDER_DIR:-dummy}:/swa_lib
     depends_on:
       - script-engine
@@ -40,7 +40,7 @@ services:
       SE_LOG_SIZE: 20000
       ELK_LOG_ENABLED: "false"
     volumes:
-      - ${SWA_HOST_LOG_DIR}:/workflow/logs
+      - ${SWA_HOST_LOG_DIR:-./logs}:/workflow/logs
     restart: on-failure
 
   mail-relay:
@@ -52,7 +52,7 @@ services:
     ports:
       - "0.0.0.0:${SWA_MAIL_RELAY_PORT:-25}:25"
     volumes:
-      - ${SWA_HOST_LOG_DIR}:/workflow/logs
+      - ${SWA_HOST_LOG_DIR:-./logs}:/workflow/logs
     restart: on-failure
 
   public-api:
@@ -63,7 +63,7 @@ services:
       CRNK_DOMAIN_NAME: "${SWA_CORE_SERVICE_BASEURL}"
       LOG_FILE: "/workflow/logs/public-api.log"
     volumes:
-      - ${SWA_HOST_LOG_DIR}:/workflow/logs
+      - ${SWA_HOST_LOG_DIR:-./logs}:/workflow/logs
     restart: on-failure
 
   https-proxy:
