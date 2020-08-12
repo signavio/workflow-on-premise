@@ -8,7 +8,7 @@ services:
     image: "signavio-on-premise.jfrog.io/swa/core-service:v3.136.0-rc0"
     env_file: .env
     environment:
-      TOMCAT_OPTS: "-Xms${SWA_CORE_SERVICE_JAVA_HEAP_MIN:-512m} -Xmx${SWA_CORE_SERVICE_JAVA_HEAP_MAX:-2048m} -XX:+UseContainerSupport -server -Dfile.encoding=UTF-8 -Djava.awt.headless=true -Djava.security.egd=file:/dev/./urandom"
+      TOMCAT_OPTS: "-Xms${SWA_CORE_SERVICE_JAVA_HEAP_MIN:-512m} -Xmx${SWA_CORE_SERVICE_JAVA_HEAP_MAX:-2048m} -XX:+UseContainerSupport -server -Dfile.encoding=UTF-8 -Djava.awt.headless=true -Djava.security.egd=file:/dev/./urandom ${SWA_CORE_SERVICE_TOMCAT_OPTS}"
       SWA_PRECONDITION_SERVICES: "tcp:script-engine:8081"
       CATALINA_OPTS:
         "-Deffektif.javascript.server.url=http://script-engine:8081 \
