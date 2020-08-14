@@ -43,7 +43,7 @@ services:
     restart: on-failure
 
   mail-relay:
-    image: "signavio-on-premise.jfrog.io/swa/${SWA_MAIL_RELAY_IMG:-mail-relay:v3.0.0}"
+    image: "signavio-on-premise.jfrog.io/swa/${SWA_MAIL_RELAY_IMG:-mail-relay:v3.0.1}"
     env_file: .env
     environment:
       SWA_MAIL_RELAY_SERVER_URL: "http://core-service:80"
