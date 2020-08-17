@@ -1,7 +1,4 @@
 version: "3"
-volumes:
-  dummy:
-    driver: local
 
 services:
   core-service:
@@ -66,16 +63,20 @@ services:
     restart: on-failure
 
   https-proxy:
-    image: "signavio-on-premise.jfrog.io/swa/https-proxy:v1.0.0"
+    image: "signavio-on-premise.jfrog.io/swa/https-proxy:v2.0.0"
     env_file: .env
     environment:
-      CORE_SERVICE_URL: "http://core-service:80"
-      SWA_BASE_URL: "${SWA_CORE_SERVICE_BASEURL}"
+      UPSTREAM_URL: "http://core-service:80"
+      PUBLIC_URL: "${SWA_CORE_SERVICE_BASEURL}"
+      HTTPS_PROXY_ENABLED: "${SWA_HTTPS_PROXY_ENABLED}"
+      CERT_FILE_NAME: "${SWA_CERT_FILE_NAME}"
+      CERT_KEY_FILE_NAME: "${SWA_CERT_KEY_FILE_NAME}"
     ports:
-      - "${SWA_CORE_SERVICE_PORT:-443}:443"
-      - "80:80"
+      - "${SWA_HTTPS_PORT:-443}:443"
+      - "${SWA_HTTP_PORT:-80}:80"
     volumes:
-      - ${SWA_HTTPS_PROXY_CERT_DIR:-dummy}:/etc/ssl/certs/signavio
+      - ${SWA_CORE_SERVICE_HOST_CONFIG_DIR:-./config}:/etc/ssl/certs/signavio
+      - ${SWA_HOST_LOG_DIR:-./logs}:/workflow/logs
     depends_on:
       - core-service
     restart: on-failure
