@@ -40,7 +40,7 @@ services:
     restart: on-failure
 
   mail-relay:
-    image: "signavio-on-premise.jfrog.io/swa/${SWA_MAIL_RELAY_IMG:-mail-relay:v3.0.1}"
+    image: "signavio-on-premise.jfrog.io/swa/${SWA_MAIL_RELAY_IMG:-mail-relay:v3.0.2}"
     env_file: .env
     environment:
       SWA_MAIL_RELAY_SERVER_URL: "http://core-service:80"
@@ -58,15 +58,16 @@ services:
       WORKFLOW_API_REST_SWA_URL: "${SWA_CORE_SERVICE_BASEURL}"
       CRNK_DOMAIN_NAME: "${SWA_CORE_SERVICE_BASEURL}"
       LOG_FILE: "/workflow/logs/public-api.log"
+      LOG_FILE_MAX_HISTORY: 30
     volumes:
       - ${SWA_HOST_LOG_DIR:-./logs}:/workflow/logs
     restart: on-failure
 
   https-proxy:
-    image: "signavio-on-premise.jfrog.io/swa/https-proxy:v2.0.0"
+    image: "signavio-on-premise.jfrog.io/swa/https-proxy:v2.1.0"
     env_file: .env
     environment:
-      UPSTREAM_URL: "http://core-service:80"
+      LOCATIONS: "/;http://core-service:80 /public-api/v1;http://public-api:8080"
       PUBLIC_URL: "${SWA_CORE_SERVICE_BASEURL}"
       HTTPS_PROXY_ENABLED: "${SWA_HTTPS_PROXY_ENABLED}"
       CERT_FILE_NAME: "${SWA_CERT_FILE_NAME}"
