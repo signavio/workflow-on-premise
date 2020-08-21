@@ -2,7 +2,7 @@ version: "3"
 
 services:
   core-service:
-    image: "signavio-on-premise.jfrog.io/swa/core-service:op-test"
+    image: "signavio-on-premise.jfrog.io/swa/core-service:v3.139.1"
     env_file: .env
     environment:
       TOMCAT_OPTS: "-Xms${SWA_CORE_SERVICE_JAVA_HEAP_MIN:-512m} -Xmx${SWA_CORE_SERVICE_JAVA_HEAP_MAX:-2048m} -XX:+UseContainerSupport -server -Dfile.encoding=UTF-8 -Djava.awt.headless=true -Djava.security.egd=file:/dev/./urandom ${SWA_CORE_SERVICE_TOMCAT_OPTS}"
@@ -21,7 +21,7 @@ services:
     restart: on-failure
 
   script-engine:
-    image: "signavio-on-premise.jfrog.io/swa/script-engine:v3.136.0-rc0"
+    image: "signavio-on-premise.jfrog.io/swa/script-engine:v3.139.1"
     env_file: .env
     environment:
       WORKFLOW_URL: "http://core-service:80"
