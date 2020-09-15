@@ -19,6 +19,11 @@ services:
     depends_on:
       - script-engine
     restart: on-failure
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
 
   script-engine:
     image: "signavio-on-premise.jfrog.io/swa/script-engine:v3.139.1"
@@ -39,6 +44,11 @@ services:
     volumes:
       - ${SWA_HOST_LOG_DIR:-./logs}:/workflow/logs
     restart: on-failure
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
 
   mail-relay:
     image: "signavio-on-premise.jfrog.io/swa/${SWA_MAIL_RELAY_IMG:-mail-relay:v3.0.2}"
@@ -51,6 +61,11 @@ services:
     volumes:
       - ${SWA_HOST_LOG_DIR:-./logs}:/workflow/logs
     restart: on-failure
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
 
   public-api:
     image: "signavio-on-premise.jfrog.io/swa/${SWA_PUBLIC_API_IMG:-public-api:v0.0.2}"
@@ -63,6 +78,11 @@ services:
     volumes:
       - ${SWA_HOST_LOG_DIR:-./logs}:/workflow/logs
     restart: on-failure
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
 
   https-proxy:
     image: "signavio-on-premise.jfrog.io/swa/https-proxy:v2.1.0"
@@ -82,3 +102,8 @@ services:
     depends_on:
       - core-service
     restart: on-failure
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
